@@ -181,20 +181,22 @@ class RotaryEncoder:
                 self._sw_prev_state = __sw_l_s
 
     def _enc_irq_handler(self, pin):
-        new_status = (self.pin_dt.value() << 1) | self.pin_clk.value()
-        if new_status == self._enc_last_status:
+        new_status = (self.dt_pin.value() << 1) | self.clk_pin.value()
+        
+        #Debounce (has Clk changed since last trigger)
+        if (0b0001&new_status) == (0b0001&self._enc_last_status):
             return
-
-        transition = (self._enc_last_status << 2) | new_status
+        
+        # Check direction: If both (Clk and Dt) were same = counterclockwise
+        ccw = (new_status&0b01) == ((new_status>>1)&0b01)
 
         if self._sw_last_state:
             self._sw_held_with_encoder = True
-
-        direction = 0
-        if transition == 0b1110:
-            direction = 1
-        elif transition == 0b1101:
+        
+        if ccw:
             direction = -1
+        else:
+             direction = 1
 
         if direction != 0:
             self._enc_process_event(direction)
