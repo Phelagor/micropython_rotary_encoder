@@ -181,7 +181,7 @@ class RotaryEncoder:
                 self._sw_prev_state = __sw_l_s
 
     def _enc_irq_handler(self, pin):
-        new_status = (self.dt_pin.value() << 1) | self.clk_pin.value()
+        new_status = (self.pin_dt.value() << 1) | self.pin_clk.value()
         
         #Debounce (has Clk changed since last trigger)
         if (0b0001&new_status) == (0b0001&self._enc_last_status):
